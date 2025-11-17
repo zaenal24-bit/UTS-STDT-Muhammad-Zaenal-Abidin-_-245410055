@@ -75,4 +75,58 @@ GraphQL pada dasarnya adalah bahasa kueri untuk API Anda, dan runtime sisi serve
  ## Images
 
 Contoh Diagram. ![Diagram](image.png) 
+# 3. Dengan menggunakan Docker / Docker Compose, buatlah streaming replication di PostgreSQL yang bisa menjelaskan sinkronisasi. Tulislah langkah-langkah pengerjaannya dan buat penjelasan secukupnya.
+
+### Penjelasan
+
+1. Sinkronisasi replikasi PostgreSQL bekerja melalui mekanisme:
+2. Primary dikonfigurasi untuk replikasi.
+3. Standby mengambil basis data awal via pg_basebackup.
+4. Standby menghubungkan diri ke primary.
+5. WAL dikirim terus-menerus dari primary → standby.
+Perubahan data otomatis tersinkronisasi.
+
+#### `docker-compose.yml`
+
+```yaml
+version: '3.8'
+
+services:
+  primary:
+    image: postgres:15
+    container_name: pg-primary
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - primary-data:/var/lib/postgresql/data
+      - ./primary/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+  standby:
+    image: postgres:15
+    container_name: pg-standby
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - standby-data:/var/lib/postgresql/data
+    depends_on:
+      - primary
+    command: >
+      bash -c "
+      rm -rf /var/lib/postgresql/data/* &&
+      pg_basebackup -h primary -D /var/lib/postgresql/data -U postgres -Fp -Xs -P -R &&
+      echo 'primary_conninfo = \"host=primary port=5432 user=postgres password=password\"' >> /var/lib/postgresql/data/postgresql.auto.conf &&
+      postgres
+      "
+
+volumes:
+  primary-data:
+  standby-data:
+
 
