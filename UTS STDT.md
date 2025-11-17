@@ -74,7 +74,7 @@ GraphQL pada dasarnya adalah bahasa kueri untuk API Anda, dan runtime sisi serve
 
  ## Images
 
-Contoh Diagram. ![Diagram](image.png) 
+Contoh Diagram. ![Diagram](UTS.jpg) 
 # 3. Dengan menggunakan Docker / Docker Compose, buatlah streaming replication di PostgreSQL yang bisa menjelaskan sinkronisasi. Tulislah langkah-langkah pengerjaannya dan buat penjelasan secukupnya.
 
 ### Penjelasan
@@ -128,5 +128,6 @@ services:
 volumes:
   primary-data:
   standby-data:
+
 
 
